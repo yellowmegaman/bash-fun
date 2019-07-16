@@ -9,13 +9,13 @@ fi
 
 addr="$1"
 err=0
-IFS=$'\n'
 
-for service in $(curl -s "$addr" | sed 's/<br \/>/\n/g' | grep -i 'nok\|DOWN\|degraded'); do
-	name=$(echo "$service" | cut -d ':' -f1)
-	status=$(echo "$service" | cut -d ':' -f2 | tr -d ' ')
-	echo "The service $name is $status"
-	err=$((err+1))
-done
+while read -r service
+do
+        name=$(echo "$service" | cut -d ':' -f1)
+        status=$(echo "$service" | cut -d ':' -f2 | tr -d ' ')
+        echo "The service $name is $status"
+        err=$((err+1))
+done < <(curl -s "$addr"|sed 's/<br \/>/\n/g'|grep -i 'nok\|DOWN\|degraded')
 
 if [ "$err" != "0" ]; then exit 1; fi
